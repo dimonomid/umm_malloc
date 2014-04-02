@@ -26,6 +26,10 @@ than 3800 bytes block! It was so unbelievable to be, and I performed hard test:
 device worked heavily more than 30 hours. No memory leaks, everything works
 as it should work.
 
+I also found this allocator in the FreeRTOS repository:
+http://svnmios.midibox.org/listing.php?repname=svn.mios32&path=%2Ftrunk%2FFreeRTOS%2FSource%2Fportable%2FMemMang%2F&rev=1041&peg=1041# ,
+and this fact is an additional evidence of stability of ```umm_malloc```.
+
 So I completely switched to ```umm_malloc```, and I'm quite happy with it.
 
 
