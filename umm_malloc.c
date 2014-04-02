@@ -16,6 +16,8 @@
 //                     - Added some test code to assimilate a free block
 //                        with the very block if possible. Complicated and
 //                        not worth the grief.
+// D.Frank 2014-04-02  - Fixed heap configuration when UMM_TEST_MAIN is NOT set,
+//                        added user-dependent configuration file umm_malloc_cfg.h
 // ----------------------------------------------------------------------------
 //
 // This is a memory management library specifically designed to work with the
@@ -483,52 +485,16 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <stddef.h>
-#include <stdlib.h>
+//#include <stddef.h>
+//#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "umm_malloc.h"
 
-// ----------------------------------------------------------------------------
-//
-// There are a number of defines you can set at compile time that affect how
-// the memory allocator will operate. In GNU C, you set these compile time
-// defines like this:
-//
-// -D UMM_TEST_MAIN
-//
-// Set this if you want to compile in the test suite at the end of this file.
-// If you do set this variable, then the function names are left alone as
-// umm_malloc() umm_free() and umm_realloc() so that they cannot be confused
-// with the C runtime functions malloc() free() and realloc()
-//
-// If you leave this variable unset, then the function names become malloc()
-// free() and realloc() so that they can be used as the C runtime functions
-// in an embedded environment.
-//
-// -D UMM_BEST_FIT (defualt)
-//
-// Set this if you want to use a best-fit algorithm for allocating new
-// blocks
-//
-// -D UMM_FIRST_FIT
-//
-// Set this if you want to use a first-fit algorithm for allocating new
-// blocks
-//
-// -D UMM_DBG_LOG_LEVEL=n
-//
-// Set n to a value from 0 to 6 depending on how verbose you want the debug
-// log to be
-//
-// ----------------------------------------------------------------------------
-// 
-// Support for this library in a multitasking environment is provided when
-// you add bodies to the UMM_CRITICAL_ENTRY and UMM_CRITICAL_EXIT macros
-// in umm_malloc.h
-//
-// ----------------------------------------------------------------------------
+#include "umm_malloc_cfg.h"   //-- user-dependent
+
+#ifndef UMM_MALLOC_CFG__DONT_BUILD
 
 #ifndef UMM_FIRST_FIT
 #  ifndef UMM_BEST_FIT
@@ -571,25 +537,14 @@ UMM_H_ATTPACKPRE typedef struct umm_block_t {
 
 #ifndef UMM_TEST_MAIN
 
-#define umm_free    free
-#define umm_malloc  malloc
-#define umm_realloc realloc
+#ifdef UMM_REDEFINE_MEM_FUNCTIONS
+#  define umm_free    free
+#  define umm_malloc  malloc
+#  define umm_realloc realloc
+#endif
 
-extern umm_block umm_heap[];
-
-// Note that _UMM_NUMBLOCKS is a value that is computed at link time, and
-// it represents the number of blocks available for the memory manager.
-
-extern unsigned short int _UMM_NUMBLOCKS;
-
-// Link time calculations assign values to symbols, but you can't take
-// the value of something filled in at link time, you can only get its
-// address.
-//
-// That's why we take the address of _UMM_NUMBLOCKS and assign it to
-// the constant value umm_numblocks.
-
-const unsigned int umm_numblocks = (unsigned int)(&_UMM_NUMBLOCKS);
+umm_block umm_heap[(UMM_MALLOC_CFG__HEAP_SIZE / sizeof(umm_block))];
+const unsigned short int umm_numblocks = (sizeof(umm_heap) / sizeof(umm_block));
 
 #define UMM_NUMBLOCKS (umm_numblocks)
 
@@ -901,7 +856,8 @@ void umm_free( void *ptr ) {
 void *umm_malloc( size_t size ) {
 
    unsigned short int blocks;
-   volatile unsigned short int blockSize;
+   /* volatile --COMMENTED BY DFRANK because the version from FreeRTOS doesn't have it*/
+   unsigned short int blockSize = 0;
 
    unsigned short int bestSize;
    unsigned short int bestBlock;
@@ -1245,5 +1201,7 @@ main() {
    umm_info( NULL, 1 );
 
 }
+
+#endif
 
 #endif
