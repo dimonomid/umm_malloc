@@ -6,12 +6,32 @@ This is a memory management library specifically designed to work with the
 ARM7 embedded processor, but it should work on many other 32 bit processors, 
 as well as 16 and 8 bit devices.
 
+Initially I've found this great memory allocator here:
+http://hempeldesigngroup.com/embedded/stories/memorymanager/ ,
+fixed little configuration issues, and uploaded to the github.
+
 I successfully tested it on Microchip PIC32 device, and it is
-extremely effective comparing to default memory allocator produced by Microchip.
-                                                                             
+extremely effective comparing to default memory allocator provided by Microchip.
+
+I was seriously beaten by fragmentation with default allocator: my project often
+allocates blocks of various size, from several bytes to several hundreds of bytes,
+and sometimes I faced 'out of memory' error.
+My project has total 8192 bytes of heap, at the particular moment there is more
+than 5K of free memory, but default allocator has maximum non-fragmented
+memory block just of about 700 bytes, because of fragmentation.
+This is too bad, so I decided to look for more efficient solution. 
+
+When I tried this memory allocator, in exactly the same situation it has more
+than 3800 bytes block! It was so unbelievable to be, and I performed hard test:
+device worked heavily more than 30 hours. No memory leaks, everything works
+as it should work.
+
+So I completely switched to ```umm_malloc```, and I'm quite happy with it.
+
+
 Acknowledgements                                                             
 ----------------
-                                                                             
+
 Joerg Wunsch and the avr-libc provided the first malloc() implementation     
 that I examined in detail.                                                   
                                                                              
