@@ -2,6 +2,13 @@
 A memory allocator for embedded systems (microcontrollers)
 ==========================================================
 
+NOTE: this repository was created before the original author created his own one,
+so now, please, see the [original repo by Ralph Hempel](https://github.com/rhempel/umm_malloc).
+
+All improvements which I've done are already pulled there.
+
+-----------------------------------------------------------------------------
+
 This is a memory management library specifically designed to work with the   
 ARM7 embedded processor, but it should work on many other 32 bit processors, 
 as well as 16 and 8 bit devices.
